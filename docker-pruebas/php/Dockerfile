@@ -3,25 +3,24 @@ FROM php:${PHP_VERSION:+${PHP_VERSION}-}fpm-alpine
 
 # Install dependencies
 RUN apk --no-cache --update add \
-    zlib \
-    zlib-dev \
-    icu-libs \
-    icu-dev \
-    g++ \
-    openrc \
-    openrc \
     gcc \
-    make \
     autoconf \
-    libc-dev \
-    libmcrypt-dev \
-    openssl \
+    make \
     libxml2-dev \
     sqlite-dev \
     curl-dev \
     libpng-dev \
     libjpeg-turbo-dev \
+    icu-libs \
+    icu-dev \
+    zlib \
+    zlib-dev \
+    libc-dev \
     freetype-dev && \
+    pecl install apcu \
+    xdebug && \
+    docker-php-ext-enable apcu  \
+    xdebug && \
     rm -rf /tmp/* && \
     rm -rf /var/cache/apk/*
 
@@ -42,7 +41,6 @@ RUN docker-php-ext-configure json && \
     docker-php-ext-configure xml && \
     docker-php-ext-configure phar && \
     docker-php-ext-configure intl && \
-    docker-php-ext-configure mcrypt && \
     docker-php-ext-configure opcache --enable-opcache && \
     docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
 
@@ -62,10 +60,11 @@ RUN docker-php-ext-install json \
     iconv \
     xml  \
     phar \
-    gd \
     intl \
-    mcrypt \
-    opcache
+    opcache \
+    gd
 
 # Install composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+RUN chmod +x /usr/local/bin/composer
