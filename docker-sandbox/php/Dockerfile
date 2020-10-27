@@ -19,9 +19,10 @@ RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 RUN echo "Installing PHP5.6 and modules"
 # Install PHP
 RUN yum install yum-utils
-RUN yum-config-manager --enable remi-php56
+RUN yum-config-manager --enable remi-php71
 RUN yum -y install php php-bcmath php-cli php-common php-gd php-intl php-ldap php-mbstring \
-    php-mysql php-mssql php-pear php-soap php-xml php-xmlrpc php-pecl php-pdo pmbstringhp-zts php-devel php-mcrypt php-fileinfo
+    php-mysql php-mssql php-pear php-soap php-xml php-xmlrpc php-pecl php-pdo pmbstringhp-zts php-devel php-mcrypt php-fileinfo php-zip
+#RUN pecl install mongodb
 
 RUN echo "Copying PDO Informix and SKD"
 RUN yum install -y wget git glibc gcc make
@@ -52,7 +53,7 @@ RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 RUN chmod +x /usr/local/bin/composer
 
-WORKDIR /app
+WORKDIR /var/www/html
 
 # Start Apache
 EXPOSE 80
