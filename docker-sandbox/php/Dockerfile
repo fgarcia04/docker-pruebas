@@ -10,6 +10,11 @@ RUN yum -y update
 RUN yum -y install httpd httpd-tools
 
 COPY localhost.conf /etc/httpd/conf.d/
+COPY servicios.conf /etc/httpd/conf.d/
+COPY urbano5.conf /etc/httpd/conf.d/
+
+RUN echo "Copying PDO Informix and SKD"
+RUN yum install -y wget git glibc gcc make openssl libssl-dev libcurl4-openssl-dev
 
 RUN echo "Installing EPEL Repo"
 # Install EPEL Repo
@@ -22,10 +27,8 @@ RUN yum install yum-utils
 RUN yum-config-manager --enable remi-php71
 RUN yum -y install php php-bcmath php-cli php-common php-gd php-intl php-ldap php-mbstring \
     php-mysql php-mssql php-pear php-soap php-xml php-xmlrpc php-pecl php-pdo pmbstringhp-zts php-devel php-mcrypt php-fileinfo php-zip
-#RUN pecl install mongodb
+RUN pecl install mongodb
 
-RUN echo "Copying PDO Informix and SKD"
-RUN yum install -y wget git glibc gcc make
 WORKDIR /opt
 COPY pdo_informix/clientsdk.4.10.FC7DE.LINUX.tar.gz /opt/clientsdk.4.10.FC7DE.LINUX.tar.gz
 RUN wget https://pecl.php.net/get/PDO_INFORMIX-1.3.3.tgz
