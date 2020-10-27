@@ -4,6 +4,11 @@ MAINTAINER Federico Garcia <fgarcia@urbano.com.ar>
 
 RUN echo "Starting to setup Docker"
 
+RUN echo "Installing Apache"
+# Install Apache
+RUN yum -y update
+RUN yum -y install httpd httpd-tools
+
 RUN echo "Installing EPEL Repo"
 # Install EPEL Repo
 RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
@@ -40,3 +45,6 @@ WORKDIR /opt/PDO_INFORMIX-1.3.3
 RUN make
 RUN make install
 
+# Start Apache
+EXPOSE 80
+CMD ["/usr/sbin/httpd","-D","FOREGROUND"]
