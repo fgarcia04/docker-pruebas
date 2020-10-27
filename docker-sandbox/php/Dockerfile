@@ -32,7 +32,8 @@ RUN pecl install mongodb
 WORKDIR /opt
 COPY pdo_informix/clientsdk.4.10.FC7DE.LINUX.tar.gz /opt/clientsdk.4.10.FC7DE.LINUX.tar.gz
 RUN wget https://pecl.php.net/get/PDO_INFORMIX-1.3.3.tgz
-COPY pdo_informix/pdo_informix.ini /etc/php.d/pdo_informix.ini
+COPY pdo_informix/pdo_informix.ini /etc/php.d
+COPY mongodb/mongodb.ini /etc/php.d
 
 RUN echo "Extracting PDO Informix and sdk"
 RUN tar -xzvf clientsdk.4.10.FC7DE.LINUX.tar.gz
