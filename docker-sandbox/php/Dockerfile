@@ -1,70 +1,42 @@
-ARG PHP_VERSION=""
-FROM php:${PHP_VERSION:+${PHP_VERSION}-}fpm-alpine
+FROM centos:7
 
-# Install dependencies
-RUN apk --no-cache --update add \
-    gcc \
-    autoconf \
-    make \
-    libxml2-dev \
-    sqlite-dev \
-    curl-dev \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    icu-libs \
-    icu-dev \
-    zlib \
-    zlib-dev \
-    libc-dev \
-    freetype-dev && \
-    pecl install apcu \
-    xdebug && \
-    docker-php-ext-enable apcu  \
-    xdebug && \
-    rm -rf /tmp/* && \
-    rm -rf /var/cache/apk/*
+MAINTAINER Federico Garcia <fgarcia@urbano.com.ar>
 
-# Configure PHP extensions
-RUN docker-php-ext-configure json && \
-    docker-php-ext-configure session && \
-    docker-php-ext-configure ctype && \
-    docker-php-ext-configure tokenizer && \
-    docker-php-ext-configure simplexml && \
-    docker-php-ext-configure dom && \
-    docker-php-ext-configure mbstring && \
-    docker-php-ext-configure zip && \
-    docker-php-ext-configure pdo && \
-    docker-php-ext-configure pdo_sqlite && \
-    docker-php-ext-configure pdo_mysql && \
-    docker-php-ext-configure curl && \
-    docker-php-ext-configure iconv && \
-    docker-php-ext-configure xml && \
-    docker-php-ext-configure phar && \
-    docker-php-ext-configure intl && \
-    docker-php-ext-configure opcache --enable-opcache && \
-    docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+RUN echo "Starting to setup Docker"
 
-# Build and install PHP extensions
-RUN docker-php-ext-install json \
-    session \
-    ctype \
-    tokenizer \
-    simplexml \
-    dom \
-    mbstring \
-    zip \
-    pdo \
-    pdo_sqlite \
-    pdo_mysql \
-    curl \
-    iconv \
-    xml  \
-    phar \
-    intl \
-    opcache \
-    gd
+RUN echo "Installing EPEL Repo"
+# Install EPEL Repo
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 
-# Install composer
-RUN curl -sS https://getcomposer.org/installer | php
-RUN mv composer.phar /usr/local/bin/composer
-RUN chmod +x /usr/local/bin/composer
+RUN echo "Installing PHP5.6 and modules"
+# Install PHP
+RUN yum install yum-utils
+RUN yum-config-manager --enable remi-php56
+RUN yum -y install php php-bcmath php-cli php-common php-gd php-intl php-ldap php-mbstring \
+    php-mysql php-mssql php-pear php-soap php-xml php-xmlrpc php-pecl php-pdo pmbstringhp-zts php-devel php-mcrypt php-fileinfo
+
+RUN echo "Copying PDO Informix and SKD"
+RUN yum install -y wget git glibc gcc make
+WORKDIR /opt
+COPY pdo_informix/clientsdk.4.10.FC7DE.LINUX.tar.gz /opt/clientsdk.4.10.FC7DE.LINUX.tar.gz
+RUN wget https://pecl.php.net/get/PDO_INFORMIX-1.3.3.tgz
+COPY pdo_informix/pdo_informix.ini /etc/php.d/pdo_informix.ini
+
+RUN echo "Extracting PDO Informix and sdk"
+RUN tar -xzvf clientsdk.4.10.FC7DE.LINUX.tar.gz
+RUN tar -xzvf PDO_INFORMIX-1.3.3.tgz
+
+RUN echo "Silent installer Informix SDK"
+WORKDIR /opt/clientsdk.4.10.FC7DE.LINUX
+RUN chmod +x installclientsdk
+RUN ./installclientsdk -i silent -DLICENSE_ACCEPTED=TRUE -DPRQCHECK=FALSE
+
+RUN echo "Installer PDO"
+WORKDIR /opt/PDO_INFORMIX-1.3.3
+RUN phpize
+RUN ./configure --with-pdo-informix=/opt/IBM/informix
+WORKDIR /opt/PDO_INFORMIX-1.3.3
+RUN make
+RUN make install
+
