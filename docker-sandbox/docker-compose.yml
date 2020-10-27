@@ -1,22 +1,24 @@
 version: "3.2"
 services:
   php:
-    build: 
+    build:
       context: './php/'
       args:
-       PHP_VERSION: ${PHP_VERSION}
+        PHP_VERSION: ${PHP_VERSION}
     networks:
       - backend
     volumes:
       - ${PROJECT_ROOT}/:/var/www/html/
     container_name: php_sandbox
+    ports:
+      - "80:80"
   mysql:
     image: mysql:${MYSQL_VERSION:-latest}
     restart: always
     ports:
       - "3306:3306"
     volumes:
-            - data:/var/lib/mysql
+      - data:/var/lib/mysql
     networks:
       - backend
     environment:
@@ -28,4 +30,4 @@ services:
 networks:
   backend:
 volumes:
-    data:
+  data:

@@ -9,6 +9,8 @@ RUN echo "Installing Apache"
 RUN yum -y update
 RUN yum -y install httpd httpd-tools
 
+COPY localhost.conf /etc/httpd/conf.d/
+
 RUN echo "Installing EPEL Repo"
 # Install EPEL Repo
 RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
@@ -44,6 +46,13 @@ RUN ./configure --with-pdo-informix=/opt/IBM/informix
 WORKDIR /opt/PDO_INFORMIX-1.3.3
 RUN make
 RUN make install
+
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+RUN chmod +x /usr/local/bin/composer
+
+WORKDIR /app
 
 # Start Apache
 EXPOSE 80
